@@ -1,0 +1,50 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real-Time Document Editor</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      #editor {
+        width: 100%;
+        height: 80vh;
+        border: 1px solid #ccc;
+        padding: 10px;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Real-Time Document Editor</h1>
+    <textarea id="editor"></textarea>
+
+    <script>
+      const editor = document.getElementById("editor");
+      const ws = new WebSocket("ws://localhost:8080");
+
+      // When the WebSocket connection is open
+      ws.onopen = () => {
+        console.log("Connected to WebSocket server");
+      };
+
+      // Listen for incoming messages from the WebSocket server
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === "document") {
+          editor.value = data.content;
+        }
+      };
+
+      // Send updates to the server when the user types in the editor
+      editor.addEventListener("input", () => {
+        const content = editor.value;
+        ws.send(JSON.stringify({ type: "document", content: content }));
+      });
+    </script>
+  </body>
+</html>
